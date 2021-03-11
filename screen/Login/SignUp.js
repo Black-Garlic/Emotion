@@ -48,7 +48,7 @@ export default class SignUp extends Component {
   }
 
   sendDataToServer() {
-    const url = 'http://yooyu852.dothome.co.kr/scribble/addUser.php'
+    const url = 'http://yooyu852.dothome.co.kr/Dev/addUser.php'
 
     let data = {
       mail: this.state.mail,

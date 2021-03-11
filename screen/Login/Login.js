@@ -106,7 +106,7 @@ export default class Login extends Component {
   };
 
   checkUser(mail) {
-    const url = 'http://yooyu852.dothome.co.kr/scribble/checkUser.php'
+    const url = 'http://yooyu852.dothome.co.kr/Dev/checkUser.php'
 
     let data = {
       mail: mail,

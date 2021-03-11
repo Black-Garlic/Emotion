@@ -1374,7 +1374,7 @@ export default class Main extends Component {
   }
 
   getNumFromServer() {
-    const url = 'http://yooyu852.dothome.co.kr/scribble/getNum.php'
+    const url = 'http://yooyu852.dothome.co.kr/Dev/getNum.php'
 
     let data = {
       mail: this.state.mail,
@@ -1413,7 +1413,7 @@ export default class Main extends Component {
   }
 
   async sendDataToServer() {
-    const url = 'http://yooyu852.dothome.co.kr/scribble/addData.php'
+    const url = 'http://yooyu852.dothome.co.kr/Dev/addData.php'
 
     let content = [];
     let selected = [];

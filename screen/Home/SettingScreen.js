@@ -85,7 +85,7 @@ export default class SettingScreen extends Component {
   }
 
   changeLanguage(language) {
-    const url = 'http://yooyu852.dothome.co.kr/scribble/changeLanguage.php'
+    const url = 'http://yooyu852.dothome.co.kr/Dev/changeLanguage.php'
 
     let data = {
       mail: global.mail,
