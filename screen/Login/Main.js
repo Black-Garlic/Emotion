@@ -1379,6 +1379,7 @@ export default class Main extends Component {
     let data = {
       mail: this.state.mail,
     }
+    console.log(data);
 
     fetch(url, {
 
@@ -1395,17 +1396,7 @@ export default class Main extends Component {
         var response = responseInJson.data;
         console.log(response.num);
         console.log(response.id);
-        this.setState({ num: response.num, userAnswer: response.answer, userInput: response.input, userScore: response.score, userId: response.id, userDay: response.day });
-
-        //console.log(response.answer);
-        var count = 0;
-        for (var i = 0; i < response.answer.length; i++) {
-          //console.log("i : " + i + " category : " + response.answer[i].category + " flag : " + response.answer[i].flag);
-          if (response.answer[i].flag == 1)
-            count++;
-        }
-
-        this.setState({ necessaryCount: count, load: true });
+        this.setState({ num: response.num, userId: response.id, userDay: response.day, load: true });
       })
       .catch((e) => console.log(e))
       .finally(() => {
@@ -1499,6 +1490,7 @@ export default class Main extends Component {
     var targetInput = [];
     var sequence = [];
 
+    // Search target
     if (step == 1) {
       for (var i = 0; i < 5; i++) {
         if (this.state.wordSelected[i] == 1)
@@ -1525,7 +1517,7 @@ export default class Main extends Component {
     }
 
     if (step == 1) {
-      // Face selected
+      // Initial selected
       var num;
 
       switch (target[0]) {
@@ -1751,6 +1743,7 @@ export default class Main extends Component {
         set.push(tmp[num][i].word);
         set.push(tmp[num][i].result);
         set.push(tmp[num][i].id);
+        set.push(0);
 
         tmpList.push(set);
         //tmp[i].frequency++;
@@ -1763,6 +1756,7 @@ export default class Main extends Component {
         set.push(tmp[num][4 + randomList[i]].word);
         set.push(tmp[num][4 + randomList[i]].result);
         set.push(tmp[num][4 + randomList[i]].id);
+        set.push(0);
 
         tmpList.push(set);
         //tmp[i].frequency++;
@@ -1776,7 +1770,7 @@ export default class Main extends Component {
 
       this.resetSelected('word');
     } else {
-      // Word selected      
+      // Word selected
       index = [];
 
       let tmp;
@@ -1984,6 +1978,7 @@ export default class Main extends Component {
           set.push(tmp[i].word);
           set.push(tmp[i].result);
           set.push(tmp[i].id);
+          set.push(0);
 
           tmpList.push(set);
           tmp[i].frequency++;
@@ -2032,6 +2027,7 @@ export default class Main extends Component {
           set.push(tmp[i].word);
           set.push(tmp[i].result);
           set.push(tmp[i].id);
+          set.push(0);
 
           tmpList.push(set);
           tmp[i].frequency++;
@@ -2068,10 +2064,6 @@ export default class Main extends Component {
         this.state.totalList.push(fixList);
         this.resetSelected('state');
       }
-    }
-
-    for (var i = 0; i < this.state.userAnswer.length; i++) {
-      //console.log("i : " + i + " category : " + this.state.userAnswer[i].category + " flag : " + this.state.userAnswer[i].flag);
     }
   }
 
@@ -2162,6 +2154,11 @@ export default class Main extends Component {
   }
 
   toggleSelected(flag, i, long) {
+    let totalList = this.state.totalList;
+    var step = this.state.step;
+
+    console.log(totalList[step - 1]);
+
     if (flag == 'word') {
       var toggle = this.state.wordSelected;
       var count = this.state.wordNext;
@@ -2170,19 +2167,31 @@ export default class Main extends Component {
           count--;
         }
         toggle[i] = -1;
+
+        if (step != 0)
+          totalList[step - 1][i][3] = -1;
       } else {
         if (toggle[i] == 0) {
           toggle[i] = 1;
+
+          if (step != 0)
+            totalList[step - 1][i][3] = 1;
           count++;
         } else if (toggle[i] == 1) {
           toggle[i] = 2;
+
+          if (step != 0)
+            totalList[step - 1][i][3] = 2;
         } else {
           toggle[i] = 0;
+
+          if (step != 0)
+            totalList[step - 1][i][3] = 0;
           count--;
         }
       }
 
-      this.setState({ wordSelected: toggle, wordNext: count })
+      this.setState({ wordSelected: toggle, wordNext: count, totalList: totalList })
 
     } else if (flag == 'state') {
       var toggle = this.state.stateSelected;
@@ -2192,19 +2201,27 @@ export default class Main extends Component {
           count--;
         }
         toggle[i] = -1;
+
+        totalList[step - 1][i][3] = -1;
       } else {
         if (toggle[i] == 0) {
           toggle[i] = 1;
+          
+          totalList[step - 1][i][3] = 1;
           count++;
         } else if (toggle[i] == 1) {
           toggle[i] = 2;
+
+          totalList[step - 1][i][3] = 2;
         } else {
           toggle[i] = 0;
+          
+          totalList[step - 1][i][3] = 0;
           count--;
         }
       }
 
-      this.setState({ stateSelected: toggle, stateNext: count })
+      this.setState({ stateSelected: toggle, stateNext: count, totalList: totalList })
 
     } else if (flag == 'activity') {
       var toggle = this.state.activitySelected;
@@ -2277,6 +2294,146 @@ export default class Main extends Component {
     }
   }
 
+  fadeIn() {
+    // Question Fade
+    Animated.timing(this.state.fade[0], {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 800,
+    }).start();
+
+    // 1st
+    Animated.timing(this.state.fade[1], {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 200,
+    }).start();
+
+    // 2nd
+    Animated.timing(this.state.fade[2], {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 200,
+      delay: 200,
+    }).start();
+
+    // 3rd
+    Animated.timing(this.state.fade[3], {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 200,
+      delay: 400,
+    }).start();
+
+    // 4th
+    Animated.timing(this.state.fade[4], {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 200,
+      delay: 600,
+    }).start();
+
+    // 5th
+    Animated.timing(this.state.fade[5], {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 200,
+      delay: 800,
+    }).start();
+
+    // Dummy
+    Animated.timing(this.state.fade[6], {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 500,
+      delay: 500,
+    }).start();
+  }
+
+  fadeOut() {
+    // Question Fade
+    Animated.timing(this.state.fade[0], {
+      useNativeDriver: true,
+      toValue: 0,
+      duration: 800,
+    }).start();
+
+    // 1st
+    Animated.timing(this.state.fade[1], {
+      useNativeDriver: true,
+      toValue: 0,
+      duration: 200,
+    }).start();
+
+    // 2nd
+    Animated.timing(this.state.fade[2], {
+      useNativeDriver: true,
+      toValue: 0,
+      duration: 200,
+      delay: 200,
+    }).start();
+
+    // 3rd
+    Animated.timing(this.state.fade[3], {
+      useNativeDriver: true,
+      toValue: 0,
+      duration: 200,
+      delay: 400,
+    }).start();
+
+    // 4th
+    Animated.timing(this.state.fade[4], {
+      useNativeDriver: true,
+      toValue: 0,
+      duration: 200,
+      delay: 600,
+    }).start();
+
+    // 5th
+    Animated.timing(this.state.fade[5], {
+      useNativeDriver: true,
+      toValue: 0,
+      duration: 200,
+      delay: 800,
+    }).start();
+
+    // Dummy
+    Animated.timing(this.state.fade[6], {
+      useNativeDriver: true,
+      toValue: 0,
+      duration: 800,
+      delay: 500,
+    }).start();
+  }
+
+  renderProgressBar() {
+    return (
+      <View style={styles.progressBar}>
+        {this.state.progress.map((l, i) => (
+          this.createProgressBar(l, i)
+        ))}
+      </View>
+    )
+  }
+
+  renderTopBar() {
+    return (
+      <View style={styles.topBar}>
+        <Text style={styles.date}>{this.state.today}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            this.props.navigation.navigate('HomeStack')
+          }}
+        >
+          <Image
+            style={{ width: 15, height: 15, }}
+            source={require('../../assets/icon/close_full.png')}
+          />
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
   createProgressBar(l, i) {
     if (i == 0 || i == 9 || i == 10) {
       if (l == 0) {
@@ -2344,118 +2501,6 @@ export default class Main extends Component {
       }
     }
   }
-
-  fadeIn() {
-    // Question Fade
-    Animated.timing(this.state.fade[0], {
-      useNativeDriver: true,
-      toValue: 1,
-      duration: 800,
-    }).start();
-
-    // 1st
-    Animated.timing(this.state.fade[1], {
-      useNativeDriver: true,
-      toValue: 1,
-      duration: 200,
-    }).start();
-
-    // 2nd
-    Animated.timing(this.state.fade[2], {
-      useNativeDriver: true,
-      toValue: 1,
-      duration: 200,
-      delay: 200,
-    }).start();
-
-    // 3rd
-    Animated.timing(this.state.fade[3], {
-      useNativeDriver: true,
-      toValue: 1,
-      duration: 200,
-      delay: 400,
-    }).start();
-
-    // 4th
-    Animated.timing(this.state.fade[4], {
-      useNativeDriver: true,
-      toValue: 1,
-      duration: 200,
-      delay: 600,
-    }).start();
-
-    // 5th
-    Animated.timing(this.state.fade[5], {
-      useNativeDriver: true,
-      toValue: 1,
-      duration: 200,
-      delay: 800,
-    }).start();
-
-    // Dummy
-    Animated.timing(this.state.fade[6], {
-      useNativeDriver: true,
-      toValue: 1,
-      duration: 500,
-      delay: 500,
-    }).start();
-  };
-
-  fadeOut() {
-    // Question Fade
-    Animated.timing(this.state.fade[0], {
-      useNativeDriver: true,
-      toValue: 0,
-      duration: 800,
-    }).start();
-
-    // 1st
-    Animated.timing(this.state.fade[1], {
-      useNativeDriver: true,
-      toValue: 0,
-      duration: 200,
-    }).start();
-
-    // 2nd
-    Animated.timing(this.state.fade[2], {
-      useNativeDriver: true,
-      toValue: 0,
-      duration: 200,
-      delay: 200,
-    }).start();
-
-    // 3rd
-    Animated.timing(this.state.fade[3], {
-      useNativeDriver: true,
-      toValue: 0,
-      duration: 200,
-      delay: 400,
-    }).start();
-
-    // 4th
-    Animated.timing(this.state.fade[4], {
-      useNativeDriver: true,
-      toValue: 0,
-      duration: 200,
-      delay: 600,
-    }).start();
-
-    // 5th
-    Animated.timing(this.state.fade[5], {
-      useNativeDriver: true,
-      toValue: 0,
-      duration: 200,
-      delay: 800,
-    }).start();
-
-    // Dummy
-    Animated.timing(this.state.fade[6], {
-      useNativeDriver: true,
-      toValue: 0,
-      duration: 800,
-      delay: 500,
-    }).start();
-  };
 
   createWordButton(i) {
     if (i == 4 || i == 5) {
@@ -3708,24 +3753,8 @@ export default class Main extends Component {
             {this.state.step == 0 && // Emotion Initial Screen
               <View style={{ flex: 1 }}>
                 <View style={styles.wordTop}>
-                  <View style={styles.progressBar}>
-                    {this.state.progress.map((l, i) => (
-                      this.createProgressBar(l, i)
-                    ))}
-                  </View>
-                  <View style={styles.topBar}>
-                    <Text style={styles.date}>{this.state.today}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        this.props.navigation.navigate('HomeStack')
-                      }}
-                    >
-                      <Image
-                        style={{ width: 15, height: 15, }}
-                        source={require('../../assets/icon/close_full.png')}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  {this.renderProgressBar()}
+                  {this.renderTopBar()}
                   <Animated.View style={{ opacity: this.state.fade[0], flex: 9 }}>
                     {this.state.version == 'Eng' ?
                       <Text style={styles.questionEng}>How do you feel today?</Text>
@@ -3743,24 +3772,8 @@ export default class Main extends Component {
             {(this.state.step >= 1 && this.state.step < 5) && // Emotion Screen
               <View style={{ flex: 1 }}>
                 <View style={styles.wordTop}>
-                  <View style={styles.progressBar}>
-                    {this.state.progress.map((l, i) => (
-                      this.createProgressBar(l, i)
-                    ))}
-                  </View>
-                  <View style={styles.topBar}>
-                    <Text style={styles.date}>{this.state.today}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        this.props.navigation.navigate('HomeStack')
-                      }}
-                    >
-                      <Image
-                        style={{ width: 15, height: 15, }}
-                        source={require('../../assets/icon/close_full.png')}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  {this.renderProgressBar()}
+                  {this.renderTopBar()}
                   <Animated.View style={{ opacity: this.state.fade[0], flex: 9 }}>
                     {this.state.version == 'Eng' ?
                       <Text style={styles.questionEng}>How do you feel today?</Text>
@@ -3823,24 +3836,8 @@ export default class Main extends Component {
             {(this.state.step >= 5 && this.state.step < 9) && // State Screen
               <View style={{ flex: 1 }}>
                 <View style={styles.wordTop}>
-                  <View style={styles.progressBar}>
-                    {this.state.progress.map((l, i) => (
-                      this.createProgressBar(l, i)
-                    ))}
-                  </View>
-                  <View style={styles.topBar}>
-                    <Text style={styles.date}>{this.state.today}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        this.props.navigation.navigate('HomeStack')
-                      }}
-                    >
-                      <Image
-                        style={{ width: 15, height: 15, }}
-                        source={require('../../assets/icon/close_full.png')}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  {this.renderProgressBar()}
+                  {this.renderTopBar()}
                   <Animated.View style={{ opacity: this.state.fade[0], flex: 9 }}>
                     {this.state.version == 'Eng' ?
                       <Text style={styles.questionEng}>How do you feel today?</Text>
@@ -3903,24 +3900,8 @@ export default class Main extends Component {
             {this.state.step == 9 && // Exercise Screen
               <View style={{ flex: 1 }}>
                 <View style={styles.wordTop}>
-                  <View style={styles.progressBar}>
-                    {this.state.progress.map((l, i) => (
-                      this.createProgressBar(l, i)
-                    ))}
-                  </View>
-                  <View style={styles.topBar}>
-                    <Text style={styles.date}>{this.state.today}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        this.props.navigation.navigate('HomeStack')
-                      }}
-                    >
-                      <Image
-                        style={{ width: 15, height: 15, }}
-                        source={require('../../assets/icon/close_full.png')}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  {this.renderProgressBar()}
+                  {this.renderTopBar()}
                   <Animated.View style={{ opacity: this.state.fade[0], flex: 9 }}>
                     {this.state.version == 'Eng' ?
                       <Text style={styles.questionEng}>What made you feel this way?</Text>
@@ -3963,24 +3944,8 @@ export default class Main extends Component {
             {this.state.step == 10 && // Exercise Detail Screen
               <View style={{ flex: 1 }}>
                 <View style={styles.wordTop}>
-                  <View style={styles.progressBar}>
-                    {this.state.progress.map((l, i) => (
-                      this.createProgressBar(l, i)
-                    ))}
-                  </View>
-                  <View style={styles.topBar}>
-                    <Text style={styles.date}>{this.state.today}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        this.props.navigation.navigate('HomeStack')
-                      }}
-                    >
-                      <Image
-                        style={{ width: 15, height: 15, }}
-                        source={require('../../assets/icon/close_full.png')}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  {this.renderProgressBar()}
+                  {this.renderTopBar()}
                   <Animated.View style={{ opacity: this.state.fade[0], flex: 9 }}>
                     {this.state.version == 'Eng' ?
                       <Text style={styles.questionEng}>What made you feel this way?</Text>
@@ -4028,24 +3993,8 @@ export default class Main extends Component {
             {this.state.step == 11 && // Done Screen
               <View style={{ flex: 1 }}>
                 <View style={styles.wordTop}>
-                  <View style={styles.progressBar}>
-                    {this.state.progress.map((l, i) => (
-                      this.createProgressBar(l, i)
-                    ))}
-                  </View>
-                  <View style={styles.topBar}>
-                    <Text style={styles.date}>{this.state.today}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        this.props.navigation.navigate('HomeStack');
-                      }}
-                    >
-                      <Image
-                        style={{ width: 15, height: 15, }}
-                        source={require('../../assets/icon/complete.png')}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  {this.renderProgressBar()}
+                  {this.renderTopBar()}
                   <Animated.View style={{ opacity: this.state.fade[0], flex: 9 }}>
                     {this.state.version == 'Eng' ?
                       <Text style={styles.questionEng}>Well done!{'\n'}You have completed today's reflection.</Text>
